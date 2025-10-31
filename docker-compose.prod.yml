@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:15
+    container_name: prm-database-prod
+    environment:
+      POSTGRES_DB: prm_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - prm-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: prm-backend-prod
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: prm_db
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: production
+    ports:
+      - "3001:3001"
+    depends_on:
+      - database
+    networks:
+      - prm-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: prm-frontend-prod
+    ports:
+      - "80:5173"
+    depends_on:
+      - backend
+    networks:
+      - prm-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data_prod:
+
+networks:
+  prm-network:
+    driver: bridge

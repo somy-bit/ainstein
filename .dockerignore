@@ -1,0 +1,78 @@
+# Dependencies
+node_modules
+backend/node_modules
+npm-debug.log
+package-lock.json
+backend/package-lock.json
+
+# Environment files (keep .example files)
+.env
+.env.local
+.env.docker
+backend/.env
+backend/.env.local
+
+# Git files
+.git
+.gitignore
+
+# Documentation files (keep SETUP.md)
+README.md
+START_HERE.md
+DOCKER_SETUP.md
+POSTGRESQL_SETUP.md
+STRIPE_SETUP.md
+API_ANALYSIS.md
+ERROR_HANDLING_SUMMARY.md
+CURRENT_SETUP.md
+STRIPE_IMPLEMENTATION_REPORT.md
+setup-db.md
+
+# Docker files (keep example)
+Dockerfile*
+docker-compose.yml
+docker-compose.override.yml
+docker-compose.prod.yml
+.dockerignore
+
+# Development files
+.vscode
+.idea
+*.log
+*.tmp
+.DS_Store
+
+# Build artifacts
+dist
+build
+.vite
+backend/dist
+backend/uploads
+
+# Test files
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+__tests__
+coverage
+
+# Scripts and utilities
+*.sh
+update_api_functions.sh
+docker-start.sh
+switch-to-backend.cjs
+
+# SQL files (database setup)
+*.sql
+fix_referral_config_table.sql
+backend/setup-database.sql
+
+# TypeScript config (not needed in production)
+tsconfig.json
+backend/tsconfig.json
+vite.config.ts
+
+# Temporary files
+.tmp
+temp

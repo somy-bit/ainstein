@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  backend:
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+
+  frontend:
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/backend
+    environment:
+      - NODE_ENV=development

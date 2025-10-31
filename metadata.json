@@ -1,0 +1,9 @@
+{
+  "name": "AInstein - AI Powered PRM",
+  "description": "AInstein is an AI-First Partner Relationship Management (PRM) platform with a conversational AI agent (Partner Navigator AI) and a comprehensive SaaS PRM portal. It offers multilingual support (English, Spanish, Portuguese) and leverages AI for automation, personalization, and strategic decision-making.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "prompt": ""
+}
