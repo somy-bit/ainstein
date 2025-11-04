@@ -2,9 +2,7 @@ import Stripe from 'stripe';
 import { SubscriptionPlan } from '../models/SubscriptionPlan';
 import { AppDataSource } from '../config/databse';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-09-30.clover',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export class SubscriptionService {
   static async cancelSubscription(orgId: string, reason?: string): Promise<SubscriptionPlan> {

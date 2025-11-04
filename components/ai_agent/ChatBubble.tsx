@@ -16,26 +16,64 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, groundingChunks }) => 
   const mermaidRef = useRef<HTMLDivElement>(null);
   const [showCode, setShowCode] = useState(false);
   const [diagramError, setDiagramError] = useState<string | null>(null);
+  const [diagramId] = useState(() => `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+
+  useEffect(() => {
+    // Initialize mermaid
+    mermaid.initialize({ 
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose'
+    });
+  }, []);
 
   useEffect(() => {
     if (message.isDiagram && mermaidRef.current && !showCode) {
       const renderDiagram = async () => {
         try {
-          mermaidRef.current!.innerHTML = message.text; // Use the raw mermaid text
-          await mermaid.run({ nodes: [mermaidRef.current!] });
           setDiagramError(null);
+          
+          // Clear previous content
+          if (mermaidRef.current) {
+            mermaidRef.current.innerHTML = '';
+          }
+
+          // Extract mermaid code from message
+          let mermaidCode = message.text.trim();
+          
+          // Remove code block markers if present
+          if (mermaidCode.startsWith('```mermaid')) {
+            mermaidCode = mermaidCode.replace(/^```mermaid\s*/, '').replace(/```$/, '').trim();
+          } else if (mermaidCode.startsWith('```')) {
+            mermaidCode = mermaidCode.replace(/^```\s*/, '').replace(/```$/, '').trim();
+          }
+
+          // Validate that it looks like mermaid syntax
+          if (!mermaidCode.match(/^(graph|flowchart|pie|sequenceDiagram|classDiagram|stateDiagram|journey|gitgraph)/i)) {
+            throw new Error('Not valid Mermaid syntax. Please ask AI to generate proper Mermaid format.');
+          }
+
+          // Render the diagram
+          const { svg } = await mermaid.render(diagramId, mermaidCode);
+          
+          if (mermaidRef.current) {
+            mermaidRef.current.innerHTML = svg;
+          }
         } catch (e) {
           console.error("Mermaid rendering error:", e);
           const err = e as Error;
           setDiagramError(`Diagram Error: ${err.message}`);
           if (mermaidRef.current) {
-             mermaidRef.current.innerHTML = `<pre><code>${message.text}</code></pre>`;
+            mermaidRef.current.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded">
+              <p class="text-red-700 text-sm mb-2">Failed to render diagram</p>
+              <pre class="text-xs text-gray-600 overflow-auto">${message.text}</pre>
+            </div>`;
           }
         }
       };
       renderDiagram();
     }
-  }, [message.isDiagram, message.text, showCode]);
+  }, [message.isDiagram, message.text, showCode, diagramId]);
 
   const formatTimestamp = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -59,14 +97,14 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, groundingChunks }) => 
             <Button size="sm" variant="ghost" onClick={() => setShowCode(false)} disabled={!showCode} className={!showCode ? 'bg-slate-200' : ''}>{t('diagramView')}</Button>
             <Button size="sm" variant="ghost" onClick={() => setShowCode(true)} disabled={showCode} className={showCode ? 'bg-slate-200' : ''}>{t('codeView')}</Button>
           </div>
-          {diagramError && <div className="p-2 text-xs text-red-700 bg-red-100 rounded">{diagramError}</div>}
+          {diagramError && <div className="p-2 text-xs text-red-700 bg-red-100 rounded mb-2">{diagramError}</div>}
           {showCode ? (
             <pre className="p-2 bg-slate-800 text-white rounded-md text-xs overflow-x-auto">
               <code>{message.text}</code>
             </pre>
           ) : (
-             <div ref={mermaidRef} className="mermaid-diagram p-2 bg-white rounded-md flex justify-center items-center overflow-auto">
-               {message.text}
+             <div ref={mermaidRef} className="mermaid-diagram p-4 bg-white rounded-md border border-gray-200 min-h-[200px] flex justify-center items-center overflow-auto">
+               <div className="text-gray-500 text-sm">Rendering diagram...</div>
              </div>
           )}
         </div>
