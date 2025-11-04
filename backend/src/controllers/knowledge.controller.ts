@@ -88,21 +88,38 @@ export const uploadKnowledgeFile = async (req: AuthRequest, res: Response) => {
 
 export const addKnowledgeFile = async (req: AuthRequest, res: Response) => {
   try {
+    console.log('addKnowledgeFile - User:', req.user);
+    console.log('addKnowledgeFile - Body:', req.body);
+    
+    if (!req.user?.id) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.AUTH_REQUIRED));
+    }
+
+    // Get user from database to ensure we have organizationId
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { id: req.user.id } });
+    
+    if (!user) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.UNAUTHORIZED));
+    }
+
+    if (!user.organizationId) {
+      return res.status(400).json(createErrorResponse('User must belong to an organization to add files'));
+    }
+
     const fileRepo = AppDataSource.getRepository(KnowledgeFile);
     
-    if (!req.body.id) {
-      req.body.id = require('crypto').randomUUID();
-    }
+    const fileData = {
+      ...req.body,
+      id: req.body.id || require('crypto').randomUUID(),
+      uploadDate: req.body.uploadDate || new Date(),
+      organizationId: user.organizationId,
+      uploader: req.body.uploader || user.name || user.username
+    };
     
-    if (!req.body.uploadDate) {
-      req.body.uploadDate = new Date();
-    }
+    console.log('Saving file data:', fileData);
     
-    if (req.user?.organizationId) {
-      req.body.organizationId = req.user.organizationId;
-    }
-    
-    const file = await fileRepo.save(req.body);
+    const file = await fileRepo.save(fileData);
     res.json(file);
   } catch (error) {
     console.error('Error adding knowledge file:', error);

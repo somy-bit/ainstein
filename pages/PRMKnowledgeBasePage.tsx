@@ -79,12 +79,18 @@ const PRMKnowledgeBasePage: React.FC = () => {
     if (!linkUrl.trim() || user?.role !== UserRole.ORGANIZATION || !user.name || !user.organizationId) return;
     setIsUploading(true);
     try {
-        const url = new URL(linkUrl);
+        // Auto-add protocol if missing
+        let formattedUrl = linkUrl.trim();
+        if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+            formattedUrl = 'https://' + formattedUrl;
+        }
+        
+        const url = new URL(formattedUrl);
         const newFileData: Omit<KnowledgeFile, 'id' | 'uploadDate' | 'uploader'> = {
             name: url.hostname, // Simple name from URL
             type: 'link',
             size: 0,
-            url: linkUrl,
+            url: formattedUrl,
             organizationId: user.organizationId,
         };
         await api.addKnowledgeFile(newFileData, user.name);
@@ -92,7 +98,7 @@ const PRMKnowledgeBasePage: React.FC = () => {
         setLinkUrl('');
     } catch (error) {
         console.error("Error adding link:", error);
-        alert(t('error') + ": Please enter a valid URL. " + getErrorMessage(error));
+        alert(t('error') + ": Please enter a valid URL (e.g., google.com or https://google.com). " + getErrorMessage(error));
     }
     setIsUploading(false);
   };
@@ -210,7 +216,7 @@ const PRMKnowledgeBasePage: React.FC = () => {
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-slate-600 hidden sm:table-cell">{formatFileSize(file.size)}</td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-slate-600 hidden lg:table-cell">{new Date(file.uploadDate).toLocaleDateString()}</td>
                     {user?.role === UserRole.ORGANIZATION && <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-slate-600 hidden xl:table-cell">{file.uploader}</td>}
-                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium space-x-1 sm:space-x-2">
+                    <td className="px-3 sm:px-6 flex flex-row justify-between py-4 whitespace-nowrap text-sm font-medium space-x-1 sm:space-x-2">
                         {file.url ? (
                             <div className="flex space-x-1">
                                 <Button size="sm" variant="secondary" onClick={() => setPreviewFile(file)}>{t('preview')}</Button>
@@ -219,9 +225,7 @@ const PRMKnowledgeBasePage: React.FC = () => {
                                     className="text-primary hover:text-primary-dark transition-colors p-1" 
                                     title="Download"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={ICON_SIZE}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                    </svg>
+                                   
                                 </button>
                             </div>
                         ) : (

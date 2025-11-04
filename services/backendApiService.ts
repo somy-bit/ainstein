@@ -537,7 +537,8 @@ export const addKnowledgeFile = async (fileData: FormData | Record<string, unkno
   return apiCall('/knowledge/files', {
     method: 'POST',
     body: isFormData ? fileData : JSON.stringify({ ...fileData, uploader: uploaderName }),
-    headers: isFormData ? {} : { 'Content-Type': 'application/json' }
+    // Don't override headers completely - let apiCall handle Authorization
+    // ...(isFormData ? {} : { headers: { 'Content-Type': 'application/json' } })
   });
 };
 
