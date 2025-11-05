@@ -5,8 +5,10 @@ import {
   createSubscription, 
   updateSubscriptionUsage,
   createPaymentIntent,
-  changePlan
+  changePlan,
+  createCustomerPortalSession
 } from '../controllers/subscription.controller';
+import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = Router();
 
@@ -16,5 +18,6 @@ router.post('/', createSubscription);
 router.patch('/org/:orgId/usage', updateSubscriptionUsage);
 router.post('/payment-intent', createPaymentIntent);
 router.post('/change-plan', changePlan);
+router.post('/customer-portal', authenticateToken as any, createCustomerPortalSession as any);
 
 export default router;

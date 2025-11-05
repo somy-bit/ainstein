@@ -158,13 +158,17 @@ export const registerTrial = async (req: Request, res: Response) => {
   await queryRunner.startTransaction();
 
   try {
-    const { orgData, adminData, selectedPlan, paymentMethodId, paymentMethodData } = req.body;
+    const { userData, selectedPlan, paymentMethodId, paymentMethodData } = req.body;
     
-    console.log('Parsed registration data:', { orgData, adminData, selectedPlan, paymentMethodId });
+    console.log('Parsed registration data:', { userData, selectedPlan, paymentMethodId });
 
-    if (!orgData || !adminData || !selectedPlan) {
-      console.error('Missing required data:', { orgData: !!orgData, adminData: !!adminData, selectedPlan: !!selectedPlan });
+    if (!userData || !selectedPlan) {
+      console.error('Missing required data:', { userData: !!userData, selectedPlan: !!selectedPlan });
       return res.status(400).json(createErrorResponse(ErrorMessages.MISSING_REQUIRED_FIELDS));
+    }
+
+    if (!userData.companyId) {
+      return res.status(400).json(createErrorResponse('Company ID is required'));
     }
 
     if (!paymentMethodId) {
@@ -194,37 +198,41 @@ export const registerTrial = async (req: Request, res: Response) => {
     
     console.log('Found plan:', plan.name, 'with Stripe price ID:', plan.stripePriceId);
 
+    // Verify organization exists by companyId
     const orgRepo = queryRunner.manager.getRepository(Organization);
-    const userRepo = queryRunner.manager.getRepository(User);
+    const org = await orgRepo.findOne({ where: { companyId: userData.companyId, isActive: true } });
+    
+    if (!org) {
+      await queryRunner.rollbackTransaction();
+      return res.status(400).json(createErrorResponse('Organization not found with this Company ID or inactive'));
+    }
 
-    console.log('Creating organization...');
-    const org = await orgRepo.save({
-      name: orgData.name,
-      companyId: orgData.companyId,
-      address: orgData.address,
-      city: orgData.city,
-      province: orgData.province,
-      postalCode: orgData.postalCode,
-      country: orgData.country,
-      isActive: true
-    });
-    console.log('Organization created:', org);
+    // Check if organization already has a subscription
+    const subRepo = queryRunner.manager.getRepository(SubscriptionPlan);
+    const existingSubscription = await subRepo.findOne({ where: { orgId: org.id } });
+    
+    if (existingSubscription) {
+      await queryRunner.rollbackTransaction();
+      return res.status(400).json(createErrorResponse('Organization already has a subscription. Contact your administrator.'));
+    }
+
+    const userRepo = queryRunner.manager.getRepository(User);
 
     console.log('Creating user...');
     
     // Hash the password before saving
     const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(adminData.password, saltRounds);
+    const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
     console.log('Password hashed for user');
     
     const user = await userRepo.save({
-      username: adminData.username || adminData.email,
-      name: adminData.name,
-      lastNamePaternal: adminData.lastNamePaternal,
-      lastNameMaternal: adminData.lastNameMaternal,
-      email: adminData.email,
-      phone: adminData.phone,
-      country: adminData.country,
+      username: userData.username || userData.email,
+      name: userData.name,
+      lastNamePaternal: userData.lastNamePaternal,
+      lastNameMaternal: userData.lastNameMaternal,
+      email: userData.email,
+      phone: userData.phone,
+      country: userData.country,
       role: UserRole.ORGANIZATION,
       organizationId: org.id,
       password: hashedPassword,
@@ -237,8 +245,8 @@ export const registerTrial = async (req: Request, res: Response) => {
     // Create Stripe customer and trial subscription
     console.log('Creating Stripe customer...');
     const stripeCustomer = await StripeService.createCustomer(
-      adminData.email,
-      `${adminData.name} ${adminData.lastNamePaternal}`,
+      userData.email,
+      `${userData.name} ${userData.lastNamePaternal}`,
       org.id
     );
     console.log('Stripe customer created:', stripeCustomer.id);
@@ -271,7 +279,6 @@ export const registerTrial = async (req: Request, res: Response) => {
 
     // Create local subscription record using transaction
     console.log('Creating local subscription record...');
-    const subRepo = queryRunner.manager.getRepository(SubscriptionPlan);
     
     const subscription = await subRepo.save({
       orgId: org.id,

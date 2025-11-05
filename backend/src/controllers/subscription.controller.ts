@@ -5,6 +5,11 @@ import { PlanTemplate } from '../models/PlanTemplate';
 import { Organization } from '../models/Organization';
 import { StripeService } from '../services/stripe.service';
 import { ErrorMessages, createErrorResponse } from '../utils/errorMessages';
+import { AuthRequest } from '../middleware/auth.middleware';
+import { User } from '../models/User';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export const getAllSubscriptions = async (req: Request, res: Response) => {
   try {
@@ -257,3 +262,38 @@ function getDefaultOverageCosts(planName: string) {
   };
   return costs[planName as keyof typeof costs] || costs['Free Trial'];
 }
+
+export const createCustomerPortalSession = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json(createErrorResponse(ErrorMessages.AUTH_REQUIRED));
+    }
+
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { id: req.user.id } });
+    
+    if (!user?.organizationId) {
+      return res.status(400).json(createErrorResponse('Organization not found'));
+    }
+
+    const subscriptionRepo = AppDataSource.getRepository(SubscriptionPlan);
+    const subscription = await subscriptionRepo.findOne({ 
+      where: { orgId: user.organizationId } 
+    });
+
+    if (!subscription?.stripeCustomerId) {
+      return res.status(400).json(createErrorResponse('No Stripe customer found'));
+    }
+
+    // Create Stripe Customer Portal session
+    const session = await stripe.billingPortal.sessions.create({
+      customer: subscription.stripeCustomerId,
+      return_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/subscription`,
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('Error creating customer portal session:', error);
+    res.status(500).json(createErrorResponse('Failed to create billing portal session'));
+  }
+};

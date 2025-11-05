@@ -12,6 +12,7 @@ import { Partner } from '../models/Partner';
 import { PartnerPerformance } from '../models/PartnerPerformance';
 import { MarketingEvent } from '../models/MarketingEvent';
 import { SubscriptionService } from '../services/subscriptionService';
+import { UserRole } from '../types';
 
 export const getOrganizations = async (req: Request, res: Response) => {
   try {
@@ -150,10 +151,33 @@ export const deleteOrganization = async (req: Request, res: Response) => {
 
 export const addOrganization = async (req: Request, res: Response) => {
   try {
+    const { orgData } = req.body;
+    
+    if (!orgData) {
+      return res.status(400).json(createErrorResponse('Organization data is required'));
+    }
+
+    // Create organization only
     const orgRepo = AppDataSource.getRepository(Organization);
-    const org = await orgRepo.save(req.body);
-    res.json(org);
+    const org = await orgRepo.save({
+      name: orgData.name,
+      companyId: orgData.companyId,
+      address: orgData.address,
+      city: orgData.city,
+      province: orgData.province,
+      postalCode: orgData.postalCode,
+      country: orgData.country,
+      isActive: true
+    });
+    
+    res.json({ organization: org });
   } catch (error) {
+    console.error('Add organization failed:', error);
+    
+    if (error instanceof Error && error.message.includes('duplicate key value violates unique constraint')) {
+      return res.status(400).json(createErrorResponse('Company ID already exists'));
+    }
+    
     res.status(500).json(createErrorResponse(ErrorMessages.ORGANIZATION_CREATION_FAILED));
   }
 };

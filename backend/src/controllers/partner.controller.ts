@@ -7,6 +7,52 @@ import { PartnerPerformanceService } from '../services/partnerPerformance.servic
 import { AuthRequest } from '../middleware/auth.middleware';
 import { ErrorMessages, createErrorResponse } from '../utils/errorMessages';
 
+export const getAllPartners = async (req: AuthRequest, res: Response) => {
+  try {
+    console.log('🔍 getAllPartners called by user:', req.user?.id);
+    console.log('👤 User role:', req.user?.role);
+    
+    // Check if user has admin role
+    if (req.user?.role !== 'AInsteinAdmin') {
+      console.log('❌ Access denied for role:', req.user?.role);
+      return res.status(403).json(createErrorResponse('Access denied. Admin privileges required.'));
+    }
+
+    console.log('✅ Admin access granted, fetching all partners...');
+    
+    const partnerRepo = AppDataSource.getRepository(Partner);
+    const partners = await partnerRepo.find({ 
+      relations: ['organization'],
+      select: {
+        id: true,
+        name: true,
+        tier: true,
+        specialization: true,
+        region: true,
+        performanceScore: true,
+        contactEmail: true,
+        category: true,
+        country: true,
+        isActive: true,
+        organizationId: true,
+        organizationName: true,
+        isvType: true,
+        phone: true,
+        website: true,
+        description: true
+      }
+    });
+    
+    console.log('📊 Found partners:', partners.length);
+    console.log('🔍 Partners data:', partners.map(p => ({ name: p.name, org: p.organizationName })));
+    
+    res.json(partners);
+  } catch (error) {
+    console.error('❌ Get all partners failed:', error);
+    res.status(500).json(createErrorResponse(ErrorMessages.DATABASE_ERROR));
+  }
+};
+
 export const getPartners = async (req: AuthRequest, res: Response) => {
   try {
     const partnerRepo = AppDataSource.getRepository(Partner);

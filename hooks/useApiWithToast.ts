@@ -35,6 +35,8 @@ export const useApiWithToast = () => {
     // Partners
     getPartners: () => api.getPartners(showToast),
     
+    getAllPartners: () => api.getAllPartners(showToast),
+    
     getPartnerById: (id: string) => api.getPartnerById(id, showToast),
     
     addPartner: (partnerData: PartnerCreationData) => api.addPartner(partnerData, showToast),

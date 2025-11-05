@@ -1,7 +1,6 @@
 import { 
   OrganizationCreationData, 
   OrganizationUpdateData,
-  AdminCreationData, 
   PartnerCreationData, 
   PartnerUpdateData,
   UserCreationData, 
@@ -143,6 +142,18 @@ export const registerTrial = async (orgData: OrganizationCreationData, adminData
 };
 
 // Partners
+export const getAllPartners = async (showToast?: (message: string, type: 'error') => void) => {
+  console.log('🔄 Calling getAllPartners API...');
+  try {
+    const result = await apiCall('/partners/admin/all', {}, showToast);
+    console.log('✅ getAllPartners API response:', result);
+    return result;
+  } catch (error) {
+    console.error('❌ getAllPartners API error:', error);
+    throw error;
+  }
+};
+
 export const getPartners = async (showToast?: (message: string, type: 'error') => void) => {
   return apiCall('/partners', {}, showToast);
 };
@@ -243,11 +254,11 @@ export const getOrganizations = async (showToast?: (message: string, type: 'erro
   return apiCall('/organizations', {}, showToast);
 };
 
-export const addOrganization = async (orgData: OrganizationCreationData, adminData: AdminCreationData, showToast?: (message: string, type: 'error' | 'success') => void) => {
+export const addOrganization = async (orgData: OrganizationCreationData, showToast?: (message: string, type: 'error' | 'success') => void) => {
   try {
     const result = await apiCall('/organizations', {
       method: 'POST',
-      body: JSON.stringify({ orgData, adminData }),
+      body: JSON.stringify({ orgData }),
     }, showToast);
     
     if (showToast && result) {
@@ -570,6 +581,12 @@ export const proxySendMessageToChat = async (message: string, history: ChatHisto
     method: 'POST',
     body: JSON.stringify({ message, history, language }),
   });
+};
+
+export const createCustomerPortalSession = async (showToast?: (message: string, type: 'error' | 'success') => void) => {
+  return apiCall('/subscriptions/customer-portal', {
+    method: 'POST'
+  }, showToast);
 };
 
 // Platform config

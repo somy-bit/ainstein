@@ -57,7 +57,17 @@ const PartnersListPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const fetchedPartners = await api.getPartners();
+      console.log('🔍 User role:', user?.role);
+      console.log('🔍 Is admin?', user?.role === UserRole.AINSTEIN_ADMIN);
+      
+      // Use getAllPartners for admin, regular getPartners for others
+      const fetchedPartners = user?.role === UserRole.AINSTEIN_ADMIN 
+        ? await api.getAllPartners()
+        : await api.getPartners();
+      
+      console.log('📊 Fetched partners count:', fetchedPartners.length);
+      console.log('🤝 Fetched partners:', fetchedPartners);
+      
       setAllPartners(fetchedPartners);
       
       if(user?.role === UserRole.AINSTEIN_ADMIN) {
@@ -66,7 +76,7 @@ const PartnersListPage: React.FC = () => {
       }
 
     } catch (err) {
-      console.error("Error fetching partners:", err);
+      console.error("❌ Error fetching partners:", err);
       setError((err as Error).message || "Failed to fetch partners.");
     }
     setLoading(false);

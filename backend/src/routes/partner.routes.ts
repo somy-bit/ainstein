@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getPartners, getPartnerById, addPartner, updatePartner, deletePartner } from '../controllers/partner.controller';
+import { getPartners, getPartnerById, addPartner, updatePartner, deletePartner, getAllPartners } from '../controllers/partner.controller';
 import { checkSubscriptionLimit } from '../middleware/subscriptionLimits';
 import { extractOrgId } from '../middleware/extractOrgId';
 import { updateUsageAfterPartnerOperation } from '../middleware/updateUsageCounters';
@@ -8,7 +8,10 @@ import { authenticateToken } from '../middleware/auth.middleware';
 
 const router = Router();
 
-// Apply authentication to all routes
+// Admin-only route - NO middleware except authentication
+router.get('/admin/all', authenticateToken as any, getAllPartners as any);
+
+// Apply authentication to all other routes
 router.use(authenticateToken as any);
 
 router.get('/', checkSubscriptionAccess, getPartners as any);

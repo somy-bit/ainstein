@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from '../hooks/useTranslations';
-import { UserRole, Organization, SubscriptionPlan, StripeConfig, OrganizationCreationData, OrganizationUpdateData, AdminCreationData } from '../types';
+import { UserRole, Organization, SubscriptionPlan, StripeConfig, OrganizationCreationData, OrganizationUpdateData } from '../types';
 import * as api from "../services/backendApiService";
 import Button from '../components/common/Button';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -27,16 +27,21 @@ const AdminPanelPage: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
+            console.log('🔄 Fetching admin data...');
             const [orgs, subs, stripe] = await Promise.all([
                 api.getOrganizations(), 
                 api.getAllSubscriptions(),
                 api.getPlatformStripeConfig()
             ]);
+            console.log('📊 Fetched data:', {
+                orgs: orgs.length,
+                subs: subs.length
+            });
             setOrganizations(orgs);
             setSubscriptions(subs);
             setStripeConfig(stripe as StripeConfig);
         } catch (err) {
-            console.error("Error fetching admin data:", err);
+            console.error("❌ Error fetching admin data:", err);
             setError((err as Error).message || "Failed to fetch admin data.");
         }
         setLoading(false);
@@ -59,10 +64,10 @@ const AdminPanelPage: React.FC = () => {
         }
     };
     
-    const handleSaveOrganization = async (orgData: OrganizationCreationData, adminData: AdminCreationData) => {
+    const handleSaveOrganization = async (orgData: OrganizationCreationData) => {
         setIsSubmitting(true);
         try {
-            await api.addOrganization(orgData, adminData);
+            await api.addOrganization(orgData);
             alert(t('organizationCreatedSuccessMessage'));
             fetchData();
             setIsCreateOrgModalOpen(false);

@@ -17,29 +17,26 @@ interface PlansResponse {
   };
 }
 
+interface Organization {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
+
 const RegistrationWithPlans: React.FC = () => {
   const [plans, setPlans] = useState<PlansResponse | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>('basic');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    orgData: {
-      name: '',
-      companyId: '',
-      address: '',
-      city: '',
-      province: '',
-      postalCode: '',
-      country: ''
-    },
-    adminData: {
-      username: '',
-      name: '',
-      lastNamePaternal: '',
-      lastNameMaternal: '',
-      email: '',
-      phone: '',
-      country: ''
-    }
+    companyId: '',
+    username: '',
+    name: '',
+    lastNamePaternal: '',
+    lastNameMaternal: '',
+    email: '',
+    phone: '',
+    country: '',
+    password: ''
   });
 
   useEffect(() => {
@@ -67,7 +64,7 @@ const RegistrationWithPlans: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
+          userData: formData,
           selectedPlan
         })
       });
@@ -142,164 +139,76 @@ const RegistrationWithPlans: React.FC = () => {
       {/* Registration Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-gray-50 p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">Organization Information</h2>
+          <h2 className="text-xl font-semibold mb-4">User Information</h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Company Name"
-              value={formData.orgData.name}
-              onChange={(e) => setFormData({
-                ...formData,
-                orgData: { ...formData.orgData, name: e.target.value }
-              })}
-              className="w-full p-3 border rounded-lg"
-              required
-            />
             <input
               type="text"
               placeholder="Company ID"
-              value={formData.orgData.companyId}
-              onChange={(e) => setFormData({
-                ...formData,
-                orgData: { ...formData.orgData, companyId: e.target.value }
-              })}
+              value={formData.companyId}
+              onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
               className="w-full p-3 border rounded-lg"
               required
             />
-            <input
-              type="text"
-              placeholder="Address"
-              value={formData.orgData.address}
-              onChange={(e) => setFormData({
-                ...formData,
-                orgData: { ...formData.orgData, address: e.target.value }
-              })}
-              className="w-full p-3 border rounded-lg"
-              required
-            />
-            <input
-              type="text"
-              placeholder="City"
-              value={formData.orgData.city}
-              onChange={(e) => setFormData({
-                ...formData,
-                orgData: { ...formData.orgData, city: e.target.value }
-              })}
-              className="w-full p-3 border rounded-lg"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Province/State"
-              value={formData.orgData.province}
-              onChange={(e) => setFormData({
-                ...formData,
-                orgData: { ...formData.orgData, province: e.target.value }
-              })}
-              className="w-full p-3 border rounded-lg"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Postal Code"
-              value={formData.orgData.postalCode}
-              onChange={(e) => setFormData({
-                ...formData,
-                orgData: { ...formData.orgData, postalCode: e.target.value }
-              })}
-              className="w-full p-3 border rounded-lg"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Country"
-              value={formData.orgData.country}
-              onChange={(e) => setFormData({
-                ...formData,
-                orgData: { ...formData.orgData, country: e.target.value }
-              })}
-              className="w-full p-3 border rounded-lg"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="bg-gray-50 p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">Admin User Information</h2>
-          <div className="grid md:grid-cols-2 gap-4">
             <input
               type="text"
               placeholder="Username"
-              value={formData.adminData.username}
-              onChange={(e) => setFormData({
-                ...formData,
-                adminData: { ...formData.adminData, username: e.target.value }
-              })}
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               className="w-full p-3 border rounded-lg"
               required
             />
             <input
               type="email"
               placeholder="Email"
-              value={formData.adminData.email}
-              onChange={(e) => setFormData({
-                ...formData,
-                adminData: { ...formData.adminData, email: e.target.value }
-              })}
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full p-3 border rounded-lg"
               required
             />
             <input
               type="text"
               placeholder="First Name"
-              value={formData.adminData.name}
-              onChange={(e) => setFormData({
-                ...formData,
-                adminData: { ...formData.adminData, name: e.target.value }
-              })}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full p-3 border rounded-lg"
               required
             />
             <input
               type="text"
               placeholder="Last Name (Paternal)"
-              value={formData.adminData.lastNamePaternal}
-              onChange={(e) => setFormData({
-                ...formData,
-                adminData: { ...formData.adminData, lastNamePaternal: e.target.value }
-              })}
+              value={formData.lastNamePaternal}
+              onChange={(e) => setFormData({ ...formData, lastNamePaternal: e.target.value })}
               className="w-full p-3 border rounded-lg"
               required
             />
             <input
               type="text"
               placeholder="Last Name (Maternal)"
-              value={formData.adminData.lastNameMaternal}
-              onChange={(e) => setFormData({
-                ...formData,
-                adminData: { ...formData.adminData, lastNameMaternal: e.target.value }
-              })}
+              value={formData.lastNameMaternal}
+              onChange={(e) => setFormData({ ...formData, lastNameMaternal: e.target.value })}
               className="w-full p-3 border rounded-lg"
             />
             <input
               type="tel"
               placeholder="Phone"
-              value={formData.adminData.phone}
-              onChange={(e) => setFormData({
-                ...formData,
-                adminData: { ...formData.adminData, phone: e.target.value }
-              })}
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="w-full p-3 border rounded-lg"
               required
             />
             <input
               type="text"
               placeholder="Country"
-              value={formData.adminData.country}
-              onChange={(e) => setFormData({
-                ...formData,
-                adminData: { ...formData.adminData, country: e.target.value }
-              })}
+              value={formData.country}
+              onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+              className="w-full p-3 border rounded-lg"
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full p-3 border rounded-lg"
               required
             />
@@ -312,10 +221,10 @@ const RegistrationWithPlans: React.FC = () => {
             disabled={loading}
             className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? 'Creating Account...' : `Start ${plans.plans[selectedPlan as keyof typeof plans.plans].name} Trial`}
+            {loading ? 'Creating Account...' : `Start ${(plans.plans[selectedPlan as keyof typeof plans.plans] as Plan).name} Trial`}
           </button>
           <p className="text-sm text-gray-600 mt-2">
-            30 days free, then ${plans.plans[selectedPlan as keyof typeof plans.plans].price}/month. Cancel anytime.
+            30 days free, then ${(plans.plans[selectedPlan as keyof typeof plans.plans] as Plan).price}/month. Cancel anytime.
           </p>
         </div>
       </form>

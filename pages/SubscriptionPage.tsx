@@ -47,6 +47,17 @@ const SubscriptionPage: React.FC = () => {
         }
     }, [user?.organizationId]);
 
+    const handleManageBilling = async () => {
+        try {
+            const response = await api.createCustomerPortalSession();
+            if (response.url) {
+                window.location.href = response.url;
+            }
+        } catch (error) {
+            console.error('Error opening billing portal:', error);
+        }
+    };
+
     const handleCancelSubscription = async (reason?: string) => {
         try {
             console.log('=== FRONTEND CANCEL HANDLER DEBUG ===');
@@ -212,7 +223,13 @@ const SubscriptionPage: React.FC = () => {
                                     <Button variant="primary" className="w-full mt-3">{t('payNow')}</Button>
                                 </div>
                             ) : !isTrial && (
-                                <Button variant="secondary" className="w-full">{t('manageBilling')}</Button>
+                                <Button 
+                                    variant="secondary" 
+                                    className="w-full"
+                                    onClick={handleManageBilling}
+                                >
+                                    {t('manageBilling')}
+                                </Button>
                             )}
                         </div>
 

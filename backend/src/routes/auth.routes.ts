@@ -12,11 +12,11 @@ router.post('/login', validateRequest({
 
 // Register validation - handle nested objects
 router.post('/register-trial', validateRequest({
-  'orgData.name': (value: any) => !value ? 'Organization name is required' : null,
-  'adminData.name': (value: any) => !value ? 'First name is required' : null,
-  'adminData.lastNamePaternal': (value: any) => !value ? 'Last name is required' : null,
-  'adminData.email': authValidation.email,
-  'adminData.password': authValidation.strongPassword
+  'userData.companyId': (value: any) => !value ? 'Company ID is required' : null,
+  'userData.name': (value: any) => !value ? 'First name is required' : null,
+  'userData.lastNamePaternal': (value: any) => !value ? 'Last name is required' : null,
+  'userData.email': authValidation.email,
+  'userData.password': authValidation.strongPassword
 }), registerTrial);
 
 // Change password validation

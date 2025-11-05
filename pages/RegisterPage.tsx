@@ -36,25 +36,21 @@ const RegisterPage: React.FC = () => {
     const [selectedPlan, setSelectedPlan] = useState<string>('basic');
     const [paymentMethodData, setPaymentMethodData] = useState<StripePaymentIntent | StripePaymentMethod | null>(null);
     const [formData, setFormData] = useState({
-        // Admin user data
+        // User data
+        companyId: '',
         name: '',
         lastNamePaternal: '',
         lastNameMaternal: '',
         email: '',
         phone: '',
         password: '',
+        confirmPassword: '',
         country: '',
-        // Org data
-        organizationName: '',
-        companyId: '',
-        address: '',
-        city: '',
-        province: '',
-        postalCode: '',
-        orgCountry: '',
         // Consent
         termsAccepted: false,
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -142,6 +138,10 @@ const RegisterPage: React.FC = () => {
             setError(t('passwordRequirements'));
             return;
         }
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
         setStep(2); // Go to payment method step
     };
 
@@ -190,16 +190,8 @@ const RegisterPage: React.FC = () => {
         setIsLoading(true);
         setError('');
 
-        const orgData = {
-            name: formData.organizationName,
+        const userData = {
             companyId: formData.companyId,
-            address: formData.address,
-            city: formData.city,
-            province: formData.province,
-            postalCode: formData.postalCode,
-            country: formData.orgCountry,
-        };
-        const adminData = {
             username: formData.email,
             name: formData.name,
             lastNamePaternal: formData.lastNamePaternal,
@@ -210,11 +202,10 @@ const RegisterPage: React.FC = () => {
             password: formData.password,
         };
         
-        console.log('Registration attempt:', { orgData, adminData, selectedPlan, paymentMethodData });
+        console.log('Registration attempt:', { userData, selectedPlan, paymentMethodData });
         
         const requestBody = {
-            orgData,
-            adminData,
+            userData,
             selectedPlan,
             paymentMethodId: paymentMethodData.id,
             paymentMethodData
@@ -385,6 +376,11 @@ const RegisterPage: React.FC = () => {
             <fieldset className="border p-4 rounded-md">
                 <legend className="text-md font-semibold px-2">{t('contactInfo')}</legend>
                 <div className="space-y-3 p-2">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700">Company ID</label>
+                        <input type="text" name="companyId" value={formData.companyId} onChange={handleChange} className="mt-1 p-2 w-full border rounded-md" placeholder="Enter your company ID" required />
+                        <p className="text-xs text-slate-500 mt-1">Contact your administrator to get your company ID</p>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
                             <label className="block text-sm font-medium text-slate-700">{t('firstName')}</label>
@@ -413,48 +409,65 @@ const RegisterPage: React.FC = () => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700">{t('password')}</label>
-                        <input type="password" name="password" value={formData.password} onChange={handleChange} className="mt-1 p-2 w-full border rounded-md" required />
+                        <div className="relative">
+                            <input 
+                                type={showPassword ? "text" : "password"} 
+                                name="password" 
+                                value={formData.password} 
+                                onChange={handleChange} 
+                                className="mt-1 p-2 w-full border rounded-md pr-10" 
+                                required 
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464m1.414 1.414L8.464 8.464m5.656 5.656l1.415 1.415m-1.415-1.415l1.415 1.415M14.828 14.828L16.243 16.243" />
+                                    </svg>
+                                ) : (
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
                         <p className="text-xs text-slate-500 mt-1">{t('passwordRequirements')}</p>
                     </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700">Confirm Password</label>
+                        <div className="relative">
+                            <input 
+                                type={showConfirmPassword ? "text" : "password"} 
+                                name="confirmPassword" 
+                                value={formData.confirmPassword} 
+                                onChange={handleChange} 
+                                className="mt-1 p-2 w-full border rounded-md pr-10" 
+                                required 
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                {showConfirmPassword ? (
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464m1.414 1.414L8.464 8.464m5.656 5.656l1.415 1.415m-1.415-1.415l1.415 1.415M14.828 14.828L16.243 16.243" />
+                                    </svg>
+                                ) : (
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">Re-enter your password to confirm</p>
+                    </div>
                 </div>
-            </fieldset>
-
-             <fieldset className="border p-4 rounded-md">
-                <legend className="text-md font-semibold px-2">{t('orgInfo')}</legend>
-                 <div className="space-y-3 p-2">
-                     <div>
-                        <label className="block text-sm font-medium text-slate-700">{t('organizationName')}</label>
-                        <input type="text" name="organizationName" value={formData.organizationName} onChange={handleChange} className="mt-1 p-2 w-full border rounded-md" required />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700">Company ID</label>
-                        <input type="text" name="companyId" value={formData.companyId} onChange={handleChange} className="mt-1 p-2 w-full border rounded-md" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700">Address</label>
-                        <input type="text" name="address" value={formData.address} onChange={handleChange} className="mt-1 p-2 w-full border rounded-md" />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700">City</label>
-                            <input type="text" name="city" value={formData.city} onChange={handleChange} className="mt-1 p-2 w-full border rounded-md" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700">Province/State</label>
-                            <input type="text" name="province" value={formData.province} onChange={handleChange} className="mt-1 p-2 w-full border rounded-md" />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700">Postal Code</label>
-                            <input type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} className="mt-1 p-2 w-full border rounded-md" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700">Organization Country</label>
-                            <input type="text" name="orgCountry" value={formData.orgCountry} onChange={handleChange} className="mt-1 p-2 w-full border rounded-md" required />
-                        </div>
-                    </div>
-                 </div>
             </fieldset>
             
             <div className="pt-2">
