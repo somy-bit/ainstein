@@ -97,9 +97,10 @@ const UserManagementSection: React.FC<UserManagementSectionProps> = ({ organizat
                 const newUser: UserCreationData = {
                     ...formData,
                     username: formData.email, // Use email as username for simplicity
-                    password: 'defaultpassword', // TODO: ROLLBACK MARKER - Set a default password
+                    password: formData.password || '', // Use provided password
                     organizationId: formData.organizationId || '',
-                    isActive: formData.isActive !== undefined ? formData.isActive : true
+                    isActive: formData.isActive !== undefined ? formData.isActive : true,
+                    mustChangePassword: true // Always require password change on first login
                 };
                 await api.addUser(newUser);
             }
@@ -200,6 +201,13 @@ const UserManagementSection: React.FC<UserManagementSectionProps> = ({ organizat
                         <label className="block text-sm font-medium">{t('email')}</label>
                         <input type="email" name="email" value={formData.email || ''} onChange={handleFormChange} className="mt-1 p-2 w-full border rounded-md" required/>
                     </div>
+                    {!editingUser && (
+                        <div>
+                            <label className="block text-sm font-medium">Temporary Password</label>
+                            <input type="password" name="password" value={formData.password || ''} onChange={handleFormChange} className="mt-1 p-2 w-full border rounded-md" required placeholder="Set temporary password for user"/>
+                            <p className="text-xs text-slate-500 mt-1">User will be required to change this password on first login</p>
+                        </div>
+                    )}
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium">{t('cellNumber')}</label>

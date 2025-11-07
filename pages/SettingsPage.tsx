@@ -10,6 +10,7 @@ import UserManagementSection from './settings/UserManagementSection';
 import PartnerUserManagementSection from './settings/PartnerUserManagementSection';
 import Button from '../components/common/Button';
 import ChangePasswordSection from '../components/settings/ChangePasswordSection';
+import UserProfileSection from '../components/settings/UserProfileSection';
 
 const RoleDescriptionManager: React.FC = () => {
     const t = useTranslations();
@@ -75,6 +76,8 @@ const SettingsPage: React.FC = () => {
       <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">{t('settings')}</h1>
       
       <div className="max-w-4xl mx-auto space-y-8">
+        <UserProfileSection />
+        
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-xl">
             <h3 className="text-lg font-semibold text-slate-800">{t('displayPreferences')}</h3>
             <p className="text-sm text-slate-500 mb-4">

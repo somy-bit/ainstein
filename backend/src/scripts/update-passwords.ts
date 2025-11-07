@@ -33,7 +33,7 @@ async function updateAllPasswords() {
     }
 
     console.log(`✅ Updated ${updatedCount} users with default password`);
-    console.log(`📝 Default password: ${DEFAULT_PASSWORD}`);
+    console.log('📝 Default password has been set for all users');
     
     // List all users for verification
     const updatedUsers = await userRepo.find({

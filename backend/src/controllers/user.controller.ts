@@ -108,15 +108,10 @@ export const addUser = async (req: AuthRequest, res: Response) => {
     
     // Hash password if provided
     if (req.body.password) {
-      const defaultPassword = 'defaultPassword123';
       const saltRounds = 12;
       
-      // Check if using default password and set mustChangePassword flag
-      if (req.body.password === defaultPassword) {
-        req.body.mustChangePassword = true;
-      } else {
-        req.body.mustChangePassword = false;
-      }
+      // Always require password change for users created by managers
+      req.body.mustChangePassword = true;
       
       // Hash the password
       req.body.password = await bcrypt.hash(req.body.password, saltRounds);

@@ -223,7 +223,7 @@ export const registerTrial = async (req: Request, res: Response) => {
     // Hash the password before saving
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
-    console.log('Password hashed for user');
+    // Password hashed for user (removed for security)
     
     const user = await userRepo.save({
       username: userData.username || userData.email,
@@ -240,7 +240,7 @@ export const registerTrial = async (req: Request, res: Response) => {
       mfaEnabled: false,
       isGoogleUser: false
     });
-    console.log('User created with hashed password:', user.username);
+    console.log('User created successfully:', user.username);
 
     // Create Stripe customer and trial subscription
     console.log('Creating Stripe customer...');

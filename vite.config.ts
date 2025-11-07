@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
+    const isProduction = mode === 'production';
+    
     return {
       server: {
         port: 3000,
@@ -18,6 +20,10 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      // Remove console logs and debugger statements in production
+      esbuild: {
+        drop: isProduction ? ['console', 'debugger'] : []
       },
       build: {
         rollupOptions: {
@@ -34,10 +40,12 @@ export default defineConfig(({ mode }) => {
             }
           }
         },
-        // Enable source maps for debugging
-        sourcemap: mode === 'development',
+        // Enable source maps only in development
+        sourcemap: !isProduction,
         // Optimize chunk size
-        chunkSizeWarningLimit: 1000
+        chunkSizeWarningLimit: 1000,
+        // Minify in production
+        minify: isProduction ? 'esbuild' : false
       }
     };
 });

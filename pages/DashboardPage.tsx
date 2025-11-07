@@ -34,11 +34,78 @@ const DashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
-  // Mock data for trend indicators
-  const [trends] = useState({
-      partners: 5,
-      leads: 12,
-      conversion: -1.5,
+
+  // Calculate weekly trends dynamically
+  const calculateWeeklyTrends = () => {
+    const now = new Date();
+    const thisWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    const lastWeekStart = new Date(thisWeekStart.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const lastWeekEnd = new Date(thisWeekStart.getTime() - 1);
+
+    // Partners created this week vs last week
+    const partnersThisWeek = partners.filter(p => new Date(p.createdAt) >= thisWeekStart).length;
+    const partnersLastWeek = partners.filter(p => {
+      const createdAt = new Date(p.createdAt);
+      return createdAt >= lastWeekStart && createdAt <= lastWeekEnd;
+    }).length;
+    
+    let partnerTrend;
+    if (partnersLastWeek === 0) {
+      partnerTrend = partnersThisWeek > 0 ? 100 : 0;
+    } else if (partnersThisWeek === 0) {
+      partnerTrend = -100;
+    } else {
+      partnerTrend = ((partnersThisWeek - partnersLastWeek) / partnersLastWeek) * 100;
+    }
+
+    // Leads created this week vs last week
+    const leadsThisWeek = leads.filter(l => new Date(l.createdAt) >= thisWeekStart).length;
+    const leadsLastWeek = leads.filter(l => {
+      const createdAt = new Date(l.createdAt);
+      return createdAt >= lastWeekStart && createdAt <= lastWeekEnd;
+    }).length;
+    
+    let leadTrend;
+    if (leadsLastWeek === 0) {
+      leadTrend = leadsThisWeek > 0 ? 100 : 0;
+    } else if (leadsThisWeek === 0) {
+      leadTrend = -100;
+    } else {
+      leadTrend = ((leadsThisWeek - leadsLastWeek) / leadsLastWeek) * 100;
+    }
+
+    // Converted leads this week vs last week
+    const convertedThisWeek = leads.filter(l => l.status === 'Converted' && new Date(l.updatedAt || l.createdAt) >= thisWeekStart).length;
+    const convertedLastWeek = leads.filter(l => {
+      const updatedAt = new Date(l.updatedAt || l.createdAt);
+      return l.status === 'Converted' && updatedAt >= lastWeekStart && updatedAt <= lastWeekEnd;
+    }).length;
+    
+    let conversionTrend;
+    if (convertedLastWeek === 0) {
+      conversionTrend = convertedThisWeek > 0 ? 100 : 0;
+    } else if (convertedThisWeek === 0) {
+      conversionTrend = -100;
+    } else {
+      conversionTrend = ((convertedThisWeek - convertedLastWeek) / convertedLastWeek) * 100;
+    }
+
+    return {
+      partners: Math.round(partnerTrend * 10) / 10,
+      leads: Math.round(leadTrend * 10) / 10,
+      conversion: Math.round(conversionTrend * 10) / 10,
+    };
+  };
+
+  const trends = calculateWeeklyTrends();
+  
+  // Debug logging
+  console.log('Dashboard Debug:', {
+    partnersCount: partners.length,
+    leadsCount: leads.length,
+    trends: trends,
+    samplePartner: partners[0]?.createdAt,
+    sampleLead: leads[0]?.createdAt
   });
 
   useEffect(() => {

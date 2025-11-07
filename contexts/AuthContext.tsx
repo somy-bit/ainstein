@@ -10,6 +10,7 @@ interface AuthContextType {
   role: UserRole | null;
   login: (username: string, password?: string) => Promise<User | null>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isLoading: boolean;
   mfaRequired: boolean;
   mustChangePassword: boolean;
@@ -141,6 +142,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return false;
   };
   
+  const refreshUser = useCallback(async () => {
+    try {
+      const { user: currentUser, organization: currentOrg, subscription: currentSub } = await api.fetchCurrentUser();
+      setUser(currentUser);
+      setOrganization(currentOrg);
+      setSubscription(currentSub);
+    } catch (error) {
+      console.error("Failed to refresh user data:", error);
+    }
+  }, []);
+  
   const cancelMfa = useCallback(() => {
     setMfaRequired(false);
     setMfaUser(null);
@@ -156,7 +168,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       subscription,
       role, 
       login, 
-      logout, 
+      logout,
+      refreshUser,
       isLoading,
       mfaRequired,
       mustChangePassword,

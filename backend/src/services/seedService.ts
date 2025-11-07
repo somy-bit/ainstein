@@ -14,7 +14,7 @@ export class SeedService {
 
       // Check if admin user already exists
       const existingAdmin = await userRepo.findOne({
-        where: { username: 'admin@admin.com' }
+        where: { email: 'admin@admin.com' }
       });
 
       if (existingAdmin) {

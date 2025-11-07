@@ -111,9 +111,10 @@ const PartnerUserManagementSection: React.FC<PartnerUserManagementSectionProps> 
                     ...formData,
                     role,
                     username: formData.email,
-                    password: 'defaultpassword', // TODO: ROLLBACK MARKER - Default password for user creation
+                    password: formData.password || '', // Use provided password
                     organizationId: formData.organizationId || '',
-                    isActive: formData.isActive !== undefined ? formData.isActive : true
+                    isActive: formData.isActive !== undefined ? formData.isActive : true,
+                    mustChangePassword: true // Always require password change on first login
                 };
                 await api.addUser(newUser);
             }
@@ -206,6 +207,13 @@ const PartnerUserManagementSection: React.FC<PartnerUserManagementSectionProps> 
                         <label className="block text-sm font-medium">{t('email')}</label>
                         <input type="email" name="email" value={formData.email || ''} onChange={handleFormChange} className="mt-1 p-2 w-full border rounded-md" required/>
                     </div>
+                    {!editingUser && (
+                        <div>
+                            <label className="block text-sm font-medium">Temporary Password</label>
+                            <input type="password" name="password" value={formData.password || ''} onChange={handleFormChange} className="mt-1 p-2 w-full border rounded-md" required placeholder="Set temporary password for user"/>
+                            <p className="text-xs text-slate-500 mt-1">User will be required to change this password on first login</p>
+                        </div>
+                    )}
                     <div className="flex items-center space-x-3">
                         <label className="block text-sm font-medium">{t('userStatus')}:</label>
                         <input type="checkbox" name="isActive" checked={formData.isActive !== undefined ? formData.isActive : true} onChange={handleFormChange} className="h-5 w-5 rounded"/>

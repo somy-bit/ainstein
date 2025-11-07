@@ -14,7 +14,7 @@ AppDataSource.initialize()
     app.listen(Number(ENV.PORT), '0.0.0.0', () => {
       console.log(`🚀 Server is running on port ${ENV.PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log('👤 Admin credentials: admin@admin.com / password12345');
+      console.log('👤 Default admin user available (check documentation for credentials)');
     });
   })
   .catch((error: Error) => {
