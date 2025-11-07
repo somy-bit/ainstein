@@ -44,9 +44,25 @@ export const getAllPartners = async (req: AuthRequest, res: Response) => {
     });
     
     console.log('📊 Found partners:', partners.length);
-    console.log('🔍 Partners data:', partners.map(p => ({ name: p.name, org: p.organizationName })));
     
-    res.json(partners);
+    // Add dynamic performance scores for all partners
+    const partnersWithPerformance = await Promise.all(
+      partners.map(async (partner) => {
+        const dynamicScore = await PartnerPerformanceService.calculatePerformanceScore(partner.id);
+        return {
+          ...partner,
+          performanceScore: dynamicScore
+        };
+      })
+    );
+    
+    console.log('🔍 Partners with dynamic performance:', partnersWithPerformance.map(p => ({ 
+      name: p.name, 
+      org: p.organizationName, 
+      performance: p.performanceScore 
+    })));
+    
+    res.json(partnersWithPerformance);
   } catch (error) {
     console.error('❌ Get all partners failed:', error);
     res.status(500).json(createErrorResponse(ErrorMessages.DATABASE_ERROR));

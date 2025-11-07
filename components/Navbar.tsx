@@ -2,6 +2,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { SUPPORTED_LANGUAGES, ICON_SIZE } from '../constants';
 import { Language, MainView, LanguageOption } from '../types';
 import Select from './common/Select';
@@ -28,6 +29,7 @@ const AiAgentChatIcon = () => (
 
 const Navbar: React.FC<NavbarProps> = ({ onViewChange, onToggleSidebar, isSidebarEffectivelyOpen }) => {
   const { language, setLanguage, t } = useLanguage();
+  const { organization } = useAuth();
   const location = useLocation();
 
   const languageOptions: LanguageOption[] = SUPPORTED_LANGUAGES;
@@ -58,7 +60,14 @@ const Navbar: React.FC<NavbarProps> = ({ onViewChange, onToggleSidebar, isSideba
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-7 h-7 sm:w-8 sm:h-8 text-primary-light`}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-7.5h12c.621 0 1.125-.504 1.125-1.125V11.25c0-.621-.504-1.125-1.125-1.125h-12c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
             </svg>
-            <span className="text-lg sm:text-xl font-bold">{t('appName')}</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
+              <span className="text-lg sm:text-xl font-bold">{t('appName')}</span>
+              {organization?.name && (
+                <span className="text-sm sm:text-base text-primary-light font-medium">
+                  {organization.name}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 

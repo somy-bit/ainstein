@@ -6,7 +6,6 @@ import { useApiWithToast } from '../hooks/useApiWithToast';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import Button from '../components/common/Button';
 import CancelSubscriptionModal from '../components/subscription/CancelSubscriptionModal';
-import PlanChangeModal from '../components/subscription/PlanChangeModal';
 
 const ProgressBar: React.FC<{ value: number; max: number; colorClass?: string }> = ({ value, max, colorClass = 'bg-primary' }) => {
     const percentage = max > 0 ? (value / max) * 100 : 0;
@@ -25,8 +24,6 @@ const SubscriptionPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
-    const [showPlanChangeModal, setShowPlanChangeModal] = useState(false);
-    const [planChangeLoading, setPlanChangeLoading] = useState(false);
 
     const fetchData = useCallback(async () => {
         if (!user?.organizationId) {
@@ -80,25 +77,6 @@ const SubscriptionPage: React.FC = () => {
         } catch (error) {
             console.error('❌ Cancel error:', error);
             throw error;
-        }
-    };
-
-    const handlePlanChange = async (newPlanId: string) => {
-        if (!user?.organizationId) {
-            setError('Organization ID not available');
-            return;
-        }
-
-        setPlanChangeLoading(true);
-        try {
-            await api.changePlan({ orgId: user.organizationId, newPlanId });
-            setShowPlanChangeModal(false);
-            fetchData(); // Refresh subscription data
-        } catch (err) {
-            console.error('Error changing plan:', err);
-            setError((err as Error).message || 'Failed to change plan');
-        } finally {
-            setPlanChangeLoading(false);
         }
     };
 
@@ -256,25 +234,14 @@ const SubscriptionPage: React.FC = () => {
                              </div>
                         </div>
                          <div className="space-y-3 pt-4 border-t border-slate-200">
-                           
-                            <Button variant="ghost" className="w-full">{t('billingHistory')}</Button>
                             {subscription.status !== 'Cancelled' && (
-                                <>
-                                    <Button 
-                                        variant="primary" 
-                                        className="w-full"
-                                        onClick={() => setShowPlanChangeModal(true)}
-                                    >
-                                        Change Plan
-                                    </Button>
-                                    <Button 
-                                        variant="danger" 
-                                        className="w-full"
-                                        onClick={() => setShowCancelModal(true)}
-                                    >
-                                        {t('cancelSubscription')}
-                                    </Button>
-                                </>
+                                <Button 
+                                    variant="danger" 
+                                    className="w-full"
+                                    onClick={() => setShowCancelModal(true)}
+                                >
+                                    {t('cancelSubscription')}
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -298,14 +265,6 @@ const SubscriptionPage: React.FC = () => {
                 onClose={() => setShowCancelModal(false)}
                 onConfirm={handleCancelSubscription}
                 endsAt={subscription?.renewalDate}
-            />
-
-            <PlanChangeModal
-                isOpen={showPlanChangeModal}
-                onClose={() => setShowPlanChangeModal(false)}
-                onConfirm={handlePlanChange}
-                currentPlan={subscription?.planName || ''}
-                isLoading={planChangeLoading}
             />
         </div>
     );

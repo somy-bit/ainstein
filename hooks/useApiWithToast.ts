@@ -86,6 +86,7 @@ export const useApiWithToast = () => {
     getSubscriptionStatus: () => api.getSubscriptionStatus(showToast),
     getAllSubscriptions: () => api.getAllSubscriptions(showToast),
     createSubscription: (subscriptionData: SubscriptionCreationData) => api.createSubscription(subscriptionData, showToast),
+    createCustomerPortalSession: () => api.createCustomerPortalSession(showToast),
     updateSubscriptionUsage: (orgId: string, usageType: string, increment: number) => 
       api.updateSubscriptionUsage(orgId, usageType, increment, showToast),
     createPaymentIntent: (data: { amount: number; orgId?: string }) => api.createPaymentIntent(data, showToast),

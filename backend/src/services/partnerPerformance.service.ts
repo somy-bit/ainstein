@@ -169,6 +169,23 @@ export class PartnerPerformanceService {
       finalPercentage: percentageScore
     });
     
+    // Update the static performance score in Partner table
+    await this.updateStaticPerformanceScore(partnerId, percentageScore);
+    
     return percentageScore;
+  }
+
+  static async updateStaticPerformanceScore(partnerId: string, score: number): Promise<void> {
+    try {
+      const { AppDataSource } = await import('../config/databse');
+      const { Partner } = await import('../models/Partner');
+      
+      const partnerRepo = AppDataSource.getRepository(Partner);
+      await partnerRepo.update(partnerId, { performanceScore: score });
+      
+      console.log(`Updated static performance score for partner ${partnerId}: ${score}%`);
+    } catch (error) {
+      console.error(`Error updating static performance score for partner ${partnerId}:`, error);
+    }
   }
 }

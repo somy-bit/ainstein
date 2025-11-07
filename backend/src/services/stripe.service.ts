@@ -154,7 +154,7 @@ export class StripeService {
     }
   }
 
-  // Update subscription
+  // Update subscription with immediate effect
   static async updateSubscription(subscriptionId: string, priceId: string) {
     try {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -163,10 +163,22 @@ export class StripeService {
           id: subscription.items.data[0].id,
           price: priceId,
         }],
+        proration_behavior: 'always_invoice', // Creates immediate invoice for prorated amount
+        billing_cycle_anchor: 'now', // Resets billing cycle to start immediately
       });
       return updatedSubscription;
     } catch (error) {
       console.error('Error updating subscription:', error);
+      throw error;
+    }
+  }
+
+  // Webhook signature verification
+  static verifyWebhookSignature(payload: string, signature: string, endpointSecret: string) {
+    try {
+      return stripe.webhooks.constructEvent(payload, signature, endpointSecret);
+    } catch (error) {
+      console.error('Webhook signature verification failed:', error);
       throw error;
     }
   }

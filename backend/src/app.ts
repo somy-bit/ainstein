@@ -13,10 +13,15 @@ import subscriptionRoutes from './routes/subscription.routes';
 import subscriptionManagementRoutes from './routes/subscriptionRoutes';
 import platformRoutes from './routes/platform.routes';
 import planTemplateRoutes from './routes/planTemplate.routes';
+import webhookRoutes from './routes/webhook.routes';
 
 const app = express();
 
 app.use(cors());
+
+// Webhook routes MUST come before express.json() middleware
+app.use('/api/v1/webhooks', webhookRoutes);
+
 app.use(express.json());
 
 // Serve uploaded files statically

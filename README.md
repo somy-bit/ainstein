@@ -1,20 +1,120 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AInstein - AI-Powered Partner Relationship Management (PRM)
 
-# Run and deploy your AI Studio app
+A comprehensive Partner Relationship Management system powered by AI, built with React, TypeScript, Node.js, and PostgreSQL.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1r9R35ezFdnJJaU3g9MGfIWaN351S6beM
+- 🤖 AI-powered partner insights and recommendations
+- 👥 Partner management and onboarding
+- 📊 Performance analytics and reporting
+- 💳 Subscription management with Stripe integration
+- 🔐 JWT-based authentication
+- 📱 Responsive design
+- 🌐 Multi-language support
 
-## Run Locally
+## Prerequisites
 
-**Prerequisites:**  Node.js
+- **Node.js** 18+ 
+- **PostgreSQL** 12+
+- **Docker & Docker Compose** (optional, for containerized setup)
 
+## Quick Start
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### 1. Clone and Setup Environment
+
+```bash
+git clone <your-repo-url>
+cd demo-prm
+
+# Copy environment templates
+cp .env.template .env
+cd backend && cp .env.example .env && cd ..
+```
+
+### 2. Configure Environment Variables
+
+Edit `.env` and `backend/.env` with your actual values:
+
+**Required API Keys:**
+- `GEMINI_API_KEY`: Get from [Google AI Studio](https://makersuite.google.com/app/apikey)
+- `STRIPE_SECRET_KEY` & `STRIPE_PUBLISHABLE_KEY`: Get from [Stripe Dashboard](https://dashboard.stripe.com/apikeys)
+- `JWT_SECRET`: Generate with `openssl rand -base64 32`
+
+### 3. Run with Docker (Recommended)
+
+```bash
+docker-compose up -d
+```
+
+### 4. Run Locally (Development)
+
+```bash
+# Install dependencies
+npm install
+cd backend && npm install && cd ..
+
+# Start backend (Terminal 1)
+cd backend && npm run dev
+
+# Start frontend (Terminal 2)
+npm run dev
+```
+
+## Access Points
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:3001
+- **Default Admin**: admin@admin.com / password12345
+
+## Project Structure
+
+```
+demo-prm/
+├── components/          # React components
+├── pages/              # Page components
+├── hooks/              # Custom React hooks
+├── services/           # API services
+├── backend/            # Node.js backend
+│   ├── src/           # TypeScript source
+│   └── uploads/       # File uploads
+├── translations/       # i18n files
+└── docker-compose.yml # Container setup
+```
+
+## Development
+
+### Building for Production
+
+```bash
+npm run build
+```
+
+### Database Setup
+
+The application uses PostgreSQL with TypeORM. Database schema is automatically created on first run.
+
+### API Documentation
+
+Backend API runs on port 3001 with the following main endpoints:
+- `/api/auth/*` - Authentication
+- `/api/partners/*` - Partner management
+- `/api/subscriptions/*` - Billing
+- `/api/webhooks/*` - Stripe webhooks
+
+## Deployment
+
+1. Set production environment variables
+2. Build the application: `npm run build`
+3. Deploy using Docker or your preferred hosting platform
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

@@ -153,21 +153,69 @@ export const changePlan = async (req: Request, res: Response) => {
     if (!newPlan) {
       return res.status(400).json(createErrorResponse(ErrorMessages.INVALID_PLAN_SELECTED));
     }
-    
-    // Schedule plan change for next billing cycle
-    subscription.pendingPlanId = newPlan.id;
-    subscription.pendingPlanName = newPlan.name;
-    subscription.pendingPlanPrice = newPlan.price;
-    subscription.planChangeEffectiveDate = subscription.renewalDate;
-    
-    await subRepo.save(subscription);
-    
-    res.json({
-      message: 'Plan change scheduled successfully',
-      currentPlan: subscription.planName,
-      newPlan: newPlan.name,
-      effectiveDate: subscription.renewalDate
-    });
+
+    // If subscription has Stripe subscription ID, update it immediately
+    if (subscription.stripeSubscriptionId && newPlan.stripePriceId) {
+      try {
+        const updatedStripeSubscription = await StripeService.updateSubscription(
+          subscription.stripeSubscriptionId,
+          newPlan.stripePriceId
+        );
+
+        // Update local subscription immediately
+        subscription.planName = newPlan.name as any;
+        subscription.price = newPlan.price;
+        subscription.renewalDate = new Date((updatedStripeSubscription as any).current_period_end * 1000);
+        subscription.status = 'Active';
+        
+        // Clear any pending changes
+        subscription.pendingPlanId = undefined;
+        subscription.pendingPlanName = undefined;
+        subscription.pendingPlanPrice = undefined;
+        subscription.planChangeEffectiveDate = undefined;
+
+        await subRepo.save(subscription);
+
+        res.json({
+          message: 'Plan changed successfully',
+          currentPlan: subscription.planName,
+          newPlan: newPlan.name,
+          effectiveDate: new Date(),
+          renewalDate: subscription.renewalDate
+        });
+      } catch (stripeError) {
+        console.error('Stripe update failed:', stripeError);
+        // Fallback to scheduling for next billing cycle
+        subscription.pendingPlanId = newPlan.id;
+        subscription.pendingPlanName = newPlan.name;
+        subscription.pendingPlanPrice = newPlan.price;
+        subscription.planChangeEffectiveDate = subscription.renewalDate;
+        
+        await subRepo.save(subscription);
+        
+        res.json({
+          message: 'Plan change scheduled for next billing cycle due to payment processing',
+          currentPlan: subscription.planName,
+          newPlan: newPlan.name,
+          effectiveDate: subscription.renewalDate
+        });
+      }
+    } else {
+      // No Stripe subscription, update immediately
+      subscription.planName = newPlan.name as any;
+      subscription.price = newPlan.price;
+      subscription.features = getDefaultFeatures(newPlan.name);
+      subscription.overageCosts = getDefaultOverageCosts(newPlan.name);
+      
+      await subRepo.save(subscription);
+      
+      res.json({
+        message: 'Plan changed successfully',
+        currentPlan: subscription.planName,
+        newPlan: newPlan.name,
+        effectiveDate: new Date()
+      });
+    }
   } catch (error) {
     console.error('Error changing plan:', error);
     res.status(500).json(createErrorResponse(ErrorMessages.DATABASE_ERROR));

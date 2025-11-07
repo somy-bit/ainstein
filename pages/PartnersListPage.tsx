@@ -42,7 +42,7 @@ const PartnersListPage: React.FC = () => {
 
   // Filter options
   const [organizationOptions, setOrganizationOptions] = useState<SelectOption[]>([]);
-  const [countryOptions, setCountryOptions] = useState<CountryOption[]>([]);
+  const [countryOptions, setCountryOptions] = useState<SelectOption[]>([]);
   const [specializationOptions, setSpecializationOptions] = useState<SelectOption[]>([]); 
   
   // Modals and CRUD state
@@ -89,26 +89,54 @@ const PartnersListPage: React.FC = () => {
 
   // Effect to update dynamic filter options based on organization selection
   useEffect(() => {
+    console.log('🚨 FILTER EFFECT RUNNING - START');
+    console.log('🔍 Filter effect triggered');
+    console.log('📊 allPartners count:', allPartners.length);
+    
+    // Don't run if no partners loaded yet
+    if (allPartners.length === 0) {
+      console.log('⏳ No partners loaded yet, skipping filter update');
+      return;
+    }
+    
+    console.log('👤 User role:', user?.role);
+    console.log('🏢 Organization filter:', organizationFilter);
+    
     let relevantPartners = allPartners;
     if (user?.role === UserRole.AINSTEIN_ADMIN && organizationFilter !== 'All') {
         relevantPartners = allPartners.filter(p => p.organizationId === organizationFilter);
+        console.log('🔍 Admin filtered partners:', relevantPartners.length);
     } else if(user?.role === UserRole.ORGANIZATION || user?.role === UserRole.PARTNER_MANAGER) {
         relevantPartners = allPartners.filter(p => p.organizationId === user.organizationId);
+        console.log('🔍 Org filtered partners:', relevantPartners.length);
+    } else if (user?.role === UserRole.AINSTEIN_ADMIN && organizationFilter === 'All') {
+        console.log('🔍 Admin showing all partners:', relevantPartners.length);
     }
 
     const uniqueCountries = Array.from(new Set(relevantPartners.map(p => p.country).filter((country): country is string => Boolean(country)))) as string[];
     const sortedCountries = uniqueCountries.sort((a,b) => String(a).localeCompare(String(b)));
-    setCountryOptions([{ value: 'All', label: t('allCountries') }, ...sortedCountries.map(c => ({ value: c, label: c }))]);
+    console.log('🌍 Unique countries found:', uniqueCountries);
+    const countryOptions = [{ value: 'All', label: t('allCountries') }, ...sortedCountries.map(c => ({ value: c, label: c }))];
+    console.log('🌍 Setting country options:', countryOptions);
+    setCountryOptions(countryOptions);
     
     const uniqueSpecializations = Array.from(new Set(relevantPartners.map(p => p.specialization).filter((spec): spec is string => Boolean(spec)))) as string[];
     const sortedSpecializations = uniqueSpecializations.sort((a,b) => String(a).localeCompare(String(b)));
-    setSpecializationOptions([{ value: 'All', label: t('allSpecializations') }, ...sortedSpecializations.map(s => ({ value: s, label: s }))]);
+    console.log('🎯 Unique specializations found:', uniqueSpecializations);
+    const specializationOptions = [{ value: 'All', label: t('allSpecializations') }, ...sortedSpecializations.map(s => ({ value: s, label: s }))];
+    console.log('🎯 Setting specialization options:', specializationOptions);
+    setSpecializationOptions(specializationOptions);
     
     // Reset dependent filters when master filter changes
     setCountryFilter('All');
     setSpecializationFilter('All');
     setPartnerCategoryFilter('All');
     setIsvTypeFilter('All');
+    
+    console.log('✅ Filter effect completed - dropdowns should now have options');
+    console.log('🔍 Final state check:');
+    console.log('  - countryOptions length:', countryOptions.length);
+    console.log('  - specializationOptions length:', specializationOptions.length);
 
   }, [organizationFilter, allPartners, user, t]);
 
@@ -322,7 +350,7 @@ const PartnersListPage: React.FC = () => {
                     options={partnerCategoryOptions.map(opt => ({value: opt.value, label: t(opt.labelKey)}))}
                     value={partnerCategoryFilter}
                     onChange={(e) => setPartnerCategoryFilter(e.target.value as PartnerCategory | 'All')}
-                    disabled={secondaryFiltersDisabled}
+                   
                 />
             </div>
              <div>
@@ -332,7 +360,7 @@ const PartnersListPage: React.FC = () => {
                     options={isvTypeOptions.map(opt => ({value: opt.value, label: t(opt.labelKey)}))}
                     value={isvTypeFilter}
                     onChange={(e) => setIsvTypeFilter(e.target.value as ISVPartnerType | 'All')}
-                    disabled={secondaryFiltersDisabled}
+                    
                 />
             </div>
             <div>
@@ -342,7 +370,7 @@ const PartnersListPage: React.FC = () => {
                     options={countryOptions}
                     value={countryFilter}
                     onChange={(e) => setCountryFilter(e.target.value)}
-                    disabled={secondaryFiltersDisabled}
+                  
                 />
             </div>
              <div>
@@ -352,7 +380,7 @@ const PartnersListPage: React.FC = () => {
                     options={specializationOptions}
                     value={specializationFilter}
                     onChange={(e) => setSpecializationFilter(e.target.value)}
-                    disabled={secondaryFiltersDisabled}
+                   
                 />
             </div>
         </div>
