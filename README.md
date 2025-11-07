@@ -14,9 +14,12 @@ A comprehensive Partner Relationship Management system powered by AI, built with
 
 ## Prerequisites
 
-- **Node.js** 18+ 
-- **PostgreSQL** 12+
-- **Docker & Docker Compose** (optional, for containerized setup)
+**For Docker (Recommended):**
+- Docker & Docker Compose only
+
+**For Local Development:**
+- Node.js 18+ 
+- PostgreSQL 12+
 
 ## Quick Start
 
@@ -26,12 +29,11 @@ A comprehensive Partner Relationship Management system powered by AI, built with
 git clone <your-repo-url>
 cd demo-prm
 
-# Copy environment templates
-cp .env.template .env
-cd backend && cp .env.example .env && cd ..
+# Run setup script (copies environment templates)
+./quick-start.sh
 ```
 
-### 2. Configure Environment Variables
+### 2. Configure API Keys
 
 Edit `.env` and `backend/.env` with your actual values:
 
@@ -40,16 +42,16 @@ Edit `.env` and `backend/.env` with your actual values:
 - `STRIPE_SECRET_KEY` & `STRIPE_PUBLISHABLE_KEY`: Get from [Stripe Dashboard](https://dashboard.stripe.com/apikeys)
 - `JWT_SECRET`: Generate with `openssl rand -base64 32`
 
-### 3. Run with Docker (Recommended)
+### 3. Start Application
 
+**Option A: Docker (Recommended - No Node.js/PostgreSQL needed)**
 ```bash
 docker-compose up -d
 ```
 
-### 4. Run Locally (Development)
-
+**Option B: Local Development**
 ```bash
-# Install dependencies
+# Install dependencies first
 npm install
 cd backend && npm install && cd ..
 

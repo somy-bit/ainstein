@@ -6,21 +6,6 @@
 echo "🚀 AInstein PRM Quick Start Setup"
 echo "=================================="
 
-# Check if Node.js is installed
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js is not installed. Please install Node.js 18+ first."
-    exit 1
-fi
-
-# Check Node.js version
-NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
-if [ "$NODE_VERSION" -lt 18 ]; then
-    echo "❌ Node.js version 18+ required. Current version: $(node -v)"
-    exit 1
-fi
-
-echo "✅ Node.js $(node -v) detected"
-
 # Create environment files
 echo "📝 Setting up environment files..."
 
@@ -38,29 +23,28 @@ else
     echo "⚠️  backend/.env already exists"
 fi
 
-# Install dependencies
-echo "📦 Installing dependencies..."
-npm install
-
-echo "📦 Installing backend dependencies..."
-cd backend && npm install && cd ..
-
 echo ""
-echo "🎉 Setup complete!"
+echo "🎉 Environment files created!"
 echo ""
 echo "📋 Next steps:"
-echo "1. Edit .env and backend/.env with your API keys:"
+echo ""
+echo "1. 🔑 Edit .env and backend/.env with your API keys:"
 echo "   - GEMINI_API_KEY (get from https://makersuite.google.com/app/apikey)"
 echo "   - STRIPE_SECRET_KEY & STRIPE_PUBLISHABLE_KEY (get from Stripe dashboard)"
 echo "   - JWT_SECRET (generate with: openssl rand -base64 32)"
 echo ""
-echo "2. Start the application:"
-echo "   Option A - Docker: docker-compose up -d"
-echo "   Option B - Local:"
-echo "     Terminal 1: cd backend && npm run dev"
-echo "     Terminal 2: npm run dev"
+echo "2. 🐳 Start with Docker (RECOMMENDED - No Node.js/PostgreSQL needed):"
+echo "   docker-compose up -d"
 echo ""
-echo "3. Access the application:"
+echo "   OR"
+echo ""
+echo "3. 💻 Start locally (requires Node.js 18+ and PostgreSQL):"
+echo "   npm install"
+echo "   cd backend && npm install && cd .."
+echo "   # Terminal 1: cd backend && npm run dev"
+echo "   # Terminal 2: npm run dev"
+echo ""
+echo "4. 🌐 Access the application:"
 echo "   Frontend: http://localhost:3000"
 echo "   Backend: http://localhost:3001"
 echo "   Admin login: admin@admin.com / password12345"
